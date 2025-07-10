@@ -1,0 +1,104 @@
+import numpy as np
+
+def finite_difference(f, x, h=1e-5, method='central', order=1):
+    """
+    Aproxima a derivada de uma função usando diferenças finitas.
+    
+    Parâmetros:
+        f (function): Função a ser derivada (ex: `lambda x: x**2`).
+        x (float ou array-like): Ponto(s) onde a derivada será calculada.
+        h (float): Tamanho do passo.
+        method (str): Método ('forward', 'backward', 'central').
+        order (int): Ordem da derivada (1 ou 2).
+    
+    Retorna:
+        float ou ndarray: Aproximação da derivada em x.
+    """
+    if isinstance(x, (list, np.ndarray)):
+        return np.array([finite_difference(f, xi, h, method, order) for xi in x])
+    
+    if order == 1:
+        if method == 'forward':
+            return (f(x + h) - f(x)) / h
+        elif method == 'backward':
+            return (f(x) - f(x - h)) / h
+        elif method == 'central':
+            return (f(x + h) - f(x - h)) / (2 * h)
+        else:
+            raise ValueError("Método inválido. Use 'forward', 'backward' ou 'central'.")
+    elif order == 2:
+        return (f(x + h) - 2 * f(x) + f(x - h)) / (h ** 2)
+    else:
+        raise ValueError("Ordem inválida. Use 1 ou 2.")
+
+def input_function():
+    """
+    Pede ao usuário que defina uma função matemática.
+    Exemplos de entrada válida: 
+      - "x**2 + 3*x" 
+      - "np.sin(x)" 
+      - "exp(x)" (equivale a np.exp)
+    """
+    while True:
+        try:
+            expr = input("Digite a função f(x) (use 'x' como variável): ").strip()
+            # Substitui 'exp' por 'np.exp' para compatibilidade
+            expr = expr.replace("exp(", "np.exp(")
+            f = eval(f"lambda x: {expr}")
+            # Testa a função em x=1 para ver se é válida
+            f(1.0)
+            return f
+        except Exception as e:
+            print(f"Erro na função. Digite novamente. (Exemplo válido: 'x**2 + 1')")
+
+def input_float(prompt):
+    """Pede um número float ao usuário com tratamento de erro."""
+    while True:
+        try:
+            return float(input(prompt))
+        except ValueError:
+            print("Valor inválido. Digite um número.")
+
+def input_int(prompt, options):
+    """Pede um número inteiro dentro de uma lista de opções válidas."""
+    while True:
+        try:
+            value = int(input(prompt))
+            if value in options:
+                return value
+            else:
+                print(f"Opção inválida. Escolha entre: {options}")
+        except ValueError:
+            print("Digite um número inteiro válido.")
+
+def main():
+    print("\n=== Calculadora de Derivadas por Diferenças Finitas ===")
+    
+    # Passo 1: Define a função
+    print("\nDefina a função f(x):")
+    f = input_function()
+    
+    # Passo 2: Escolhe os pontos x
+    x_input = input("\nDigite o(s) valor(es) de x (separados por vírgula se múltiplos): ")
+    x_vals = [float(x.strip()) for x in x_input.split(",")]
+    
+    # Passo 3: Configura o passo h
+    h = input_float("\nDigite o tamanho do passo h (ex: 0.01): ")
+    
+    # Passo 4: Escolhe o método
+    method = input("\nEscolha o método (forward/backward/central): ").strip().lower()
+    while method not in ['forward', 'backward', 'central']:
+        print("Método inválido. Escolha entre: forward, backward, central")
+        method = input("Método: ").strip().lower()
+    
+    # Passo 5: Escolhe a ordem da derivada
+    order = input_int("\nOrdem da derivada (1 ou 2): ", [1, 2])
+    
+    # Passo 6: Calcula e exibe os resultados
+    print("\n=== Resultados ===")
+    for x in x_vals:
+        derivada = finite_difference(f, x, h, method, order)
+        print(f"f^({order})({x:.4f}) ≈ {derivada:.8f}")
+
+if __name__ == "__main__":
+    main()
