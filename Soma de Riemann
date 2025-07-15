@@ -1,0 +1,38 @@
+import numpy as np
+
+def soma_riemann(f, a, b, n, metodo='ponto_medio'):
+    delta_x = (b - a) / n
+    soma = 0.0
+
+    for i in range(n):
+        x_ini = a + i * delta_x
+        x_fim = x_ini + delta_x
+
+        if metodo == 'esquerda':
+            altura = f(x_ini)
+        elif metodo == 'direita':
+            altura = f(x_fim)
+        elif metodo == 'ponto_medio':
+            x_medio = (x_ini + x_fim) / 2
+            altura = f(x_medio)
+        else:
+            raise ValueError("Método inválido")
+
+        soma += altura * delta_x
+
+    return soma
+
+def criar_funcao(expressao):
+    return lambda x: eval(expressao, {'x': x, 'np': np, 'sin': np.sin, 
+                                   'cos': np.cos, 'exp': np.exp, 
+                                   'sqrt': np.sqrt})
+
+expressao = input("Digite f(x): ")
+a = float(input("a: "))
+b = float(input("b: "))
+n = int(input("n: "))
+metodo = input("método: ") or 'ponto_medio'
+
+f = criar_funcao(expressao)
+resultado = soma_riemann(f, a, b, n, metodo)
+print(f"Resultado: {resultado:.6f}")
